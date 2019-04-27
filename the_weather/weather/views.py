@@ -5,5 +5,14 @@ from django.shortcuts import render
 		city = 'Las Vegas'
 		
 		r=requests.get(url.format(city))
-    		print(r.text)
-		return render(request, 'weather/weather.html')
+		
+		city_weather = {
+	   	'city' : city,
+		'temperature' : r['main']['temp'],
+		'description' : r['weather'][0]['description'],
+		'icon' : r['weather'][0]['icon']
+		}
+		
+		
+    		context = {'city_weather' : city_weather}
+		return render(request, 'weather/weather.html' context)
