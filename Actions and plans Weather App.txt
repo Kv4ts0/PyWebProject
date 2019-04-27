@@ -1,0 +1,123 @@
+#1 django-admin startproject the_weather
+#2 cd the_weather
+#3 python manage.py startapp weather
+#4 copy files into Microsoft visual code / Atom /Pycharm ...
+#5 settings.py add INSTALL_APP - 'weather'
+#6 python manage.py migrate
+#7 python manage.py createsuperuser (USRNM,Email,PSSW)
+#8 python manage.py runserver
+#9 127.0.0.1:8000 - Local Host/Index page 127.0.0.1:8000/admin - Local host (enter your usrnm,pssw)
+#10 cut weather.html into the path--> Project/WeatherApp/the_weather/weather/templates/weather/----
+#11 edit the_weather urls.py 
+
+
+	from django.contrib import admin
+	from django.urls import path, include
+
+	urlpatterns = [
+		path('admin/',admin.site.urls),
+		path('', include('weather.urls'))                         
+	]								  
+#12 create a urls.py file into the weather folder where you can copy this code :
+						                    
+	from django.urls import path							 
+	from . import views
+
+	urlpatterns = [
+		path('', views.index),
+		                        
+	]	
+#13 weather/views.py 
+	
+	from django.shortcuts import render
+
+	def index(request):
+		return render(request, 'weather/weather.html')
+#14 restart your server --> ctrl + C and python manage.py runserver
+#15 127.0.0.1:8000 
+#16 weather/views.py
+	
+ 	from django.shortcuts import render
+
+	def index(request):
+		url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+		city = 'Las Vegas'
+
+		return render(request, 'weather/weather.html')
+#17 pipenv install requests 
+#18 weather/views.py
+	
+import requests
+from django.shortcuts import render
+
+def index(request):
+    url='http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+    city='Las Vegas'
+
+    r=requests.get(url.format(city))
+    print(r.text)
+    return render(request,'weather/weather.html')
+
+
+#19 now we can start the server again -- python manage.py runserver
+#20 we have description about our city and its weather,but we can't see this at main page.Because we have an information in our Power shell/
+ubuntu terrminal ...
+for example: 'weather':[{'id':800,'main':'Clear','description':'clear sky':86}] ...... 
+#21 weather/views.py
+
+import requests
+from django.shortcuts import render
+
+def index(request):
+	url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+	city = 'Las Vegas'
+
+	r = requests.get(url.format(city)).json()
+
+	city_weather = {
+	   	'city' : city,
+		'temperature' : r['main']['temp'],
+		'description' : r['weather'][0]['description'],
+		'icon' : r['weather'][0]['icon']
+	}
+
+	context = {'city_weather' : city_weather}
+    	return render(request,'weather/weather.html', context)
+
+#22 the_weather/weather/templates/ ---edit weather.html
+	
+	<img src='http://openweathermap.org/img/w/{{ city_weather.icon }}.png' alt='Image'>
+
+
+	<span class='title'>{{ city_weather.city }}</span>
+
+	<span class='subtitle'>{{ city_weather.temperature }}° F </span>
+	<br> {{ city_weather.description }}
+#23 the_weather/weather/models.py edit 
+
+from django.db import models
+
+class City(models.Model):
+	name = models.CharField(max_length=25)
+
+	def __str__(self):
+		return self.name
+
+	class Meta:
+    		verbose_name_plural = 'cities'
+#24 shell >>> python manage.py makemigrate
+#25 the_weather/weather/admin.py edit
+from django.contrib import admin
+from .models import City
+
+admin.site.register(City)
+
+#26 log into your admin account enter: 127.0.0.1:8000/admin
+	usrnm
+	email
+	psw
+
+Now we have a row named Cities,where you can add your city.For example Bakuriani ...
+But we can't see our cities in main page.because main page has only one city.
+we can change it.follow me ;) 
+#27
