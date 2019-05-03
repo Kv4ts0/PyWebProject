@@ -59,137 +59,230 @@ def index(request):
     return render(request,'weather/weather.html')
 
 
-#19 now we can start the server again -- python manage.py runserver
-#20 we have description about our city and its weather,but we can't see this at main page.Because we have an information in our Power shell/
-ubuntu terrminal ...
-for example: 'weather':[{'id':800,'main':'Clear','description':'clear sky':86}] ...... 
-#21 weather/views.py
+#27 (continued by giorgi_lagvilava <git.nick:atlantas1>)
+now edit views.py 
 
 import requests
 from django.shortcuts import render
 
 def index(request):
-	url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
-	city = 'Las Vegas'
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
 
-	r = requests.get(url.format(city)).json()
+    city = 'Las Vegas'
 
-	city_weather = {
-	   	'city' : city,
-		'temperature' : r['main']['temp'],
-		'description' : r['weather'][0]['description'],
-		'icon' : r['weather'][0]['icon']
-	}
+    r=requests.get(url.format(city)).json()
 
-	context = {'city_weather' : city_weather}
-    	return render(request,'weather/weather.html', context)
-
-#22 the_weather/weather/templates/ ---edit weather.html
-	
-	<img src='http://openweathermap.org/img/w/{{ city_weather.icon }}.png' alt='Image'>
+    city_weather = {
+       'city' : city,
+       'temperature' : r['main']['temp'],
+       'description' : r['weather'][0]['description'],
+       'icon' : r['weather'][0]['icon'],
+    }
 
 
-	<span class='title'>{{ city_weather.city }}</span>
+    context = {'city_weather' : city_weather}
+    return render(request, 'weather/weather.html',context)
+    
+    
+#28 now edit the weather.html
 
-	<span class='subtitle'>{{ city_weather.temperature }}° F </span>
-	<br> {{ city_weather.description }}
-#23 the_weather/weather/models.py edit 
+<span class="title">{{ city_weather.city }}</span>
+<br>
+<span class="subtitle">{{city_weather.temperature}}° F</span>
+<br> {{city_weather.description}}
+
+
+We can see our cities in main page :)
+
+
+
+#29 But we cant add cities from main page.Let's try it :) 
+
+edit models.py
 
 from django.db import models
 
 class City(models.Model):
-	name = models.CharField(max_length=25)
+    name = models.CharField(max_length=25)
 
-	def __str__(self):
-		return self.name
 
-	class Meta:
-    		verbose_name_plural = 'cities'
-#24 shell >>> python manage.py makemigrate
-#25 the_weather/weather/admin.py edit
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'cities'
+
+#30 python manage.py makemigrations
+#31 python manage.py migrate
+
+
+#32 edit admin.py
 from django.contrib import admin
 from .models import City
 
 admin.site.register(City)
 
-#26 log into your admin account enter: 127.0.0.1:8000/admin
-	usrnm
-	email
-	psw
+#33 now rerun the server
 
-Now we have a row named Cities,where you can add your city.For example Bakuriani ...
-But we can't see our cities in main page.because main page has only one city.
-we can change it.follow me ;) 
-#27 (continued by giorgi_lagvilava <git.nick:atlantas1>)
-now edit views.py 
+we can add cities in admin page
 
+#34 edit views.py
 
 
 import requests
 from django.shortcuts import render
 from .models import City
 
-
 def index(request):
-    url='http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+
     city = 'London'
 
     cities = City.objects.all()
 
     weather_data = []
 
-    for city in cities :
+    for city in cities:
 
         r=requests.get(url.format(city)).json()
 
         city_weather = {
-    	   'city' : city,
-    		'temperature' : r['main']['temp'],
-    		'description' : r['weather'][0]['description'],
-    		'icon' : r['weather'][0]['icon'],
-    		}
+           'city' : city,
+           'temperature' : r['main']['temp'],
+           'description' : r['weather'][0]['description'],
+           'icon' : r['weather'][0]['icon'],
+        }
+
         weather_data.append(city_weather)
 
+    print(weather_data)
+
+    context = {'city_weather' : city_weather}
+    return render(request, 'weather/weather.html',context)
+
+#35 
+
+
+edit views.py 
+
+
+import requests
+from django.shortcuts import render
+from .models import City
+
+def index(request):
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+
+    city = 'London'
+
+    cities = City.objects.all()
+
+    weather_data = []
+
+    for city in cities:
+
+        r=requests.get(url.format(city)).json()
+
+        city_weather = {
+           'city' : city.name,
+           'temperature' : r['main']['temp'],
+           'description' : r['weather'][0]['description'],
+           'icon' : r['weather'][0]['icon'],
+        }
+
+        weather_data.append(city_weather)
 
     context = {'weather_data' : weather_data}
-    return render(request,'weather/weather.html', context)
-    
-    
-#28 now edit the weather.html
+    return render(request, 'weather/weather.html',context)
 
 
-.
-.
-.
-<div class='column is offset-4 is-4'>
-	{% for city_weather in weather_data %}
-	
-	
-	
-.
-.
-.
+# 36
 
-	</article>
-</div>
-{% endfor %}
 
-We can see our cities in main page :)
+now edit html 
 
-#29 But we cant add cities from main page.Let's try it :) 
+<section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-offset-4 is-4">
+                  {% for city_weather in weather_data %}
+                    <div class="box">
+                        <article class="media">
+                            <div class="media-left">
+                                <figure class="image is-50x50">
+                                    <img src="http://openweathermap.org/img/w/{{city_weather.icon}}.png" alt="Image">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <span class="title">{{ city_weather.city }}</span>
+                                        <br>
+                                        <span class="subtitle">{{city_weather.temperature}}° F</span>
+                                        <br> {{city_weather.description}}
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
 
-edit forms.py
 
+in this section
+
+
+#37 add a new file into weather folder named forms.py
+
+and write 
 from django.forms import ModelForm, TextInput
 from .models import City
 
 class CityForm(ModelForm):
-	class Meta:
-		model = City
-		fields = ['name']
+    class Meta:
+        model = City
+        fields = ['name']
+
+#38 go back to the views.py
+
+import requests
+from django.shortcuts import render
+from .models import City
+from .forms import CityForm
+
+def index(request):
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
+
+    if request.method == 'POST'
+        pass
+
+    form = CityForm()
+
+    cities = City.objects.all()
+
+    weather_data = []
+
+    for city in cities:
+
+        r=requests.get(url.format(city)).json()
+
+        city_weather = {
+           'city' : city.name,
+           'temperature' : r['main']['temp'],
+           'description' : r['weather'][0]['description'],
+           'icon' : r['weather'][0]['icon'],
+        }
+
+        weather_data.append(city_weather)
+
+    context = {'weather_data' : weather_data, 'from' : form}
+    return render(request, 'weather/weather.html',context)
 		
-#30 There are final codes what you want to finish this project:
-	Please read everything!!!
+------------------- There are final codes what you want to finish this project:------------------------------------------
+					Please read everything!!!
 
 
 
