@@ -21,13 +21,13 @@ def index(request):
 		r=requests.get(url.format(city)).json()
 		
 		city_weather = {
-	   		'city' : city,
+	   		'city' : city.name,
 	   		'temperature' : r['main']['temp'],
 	   		'description' : r['weather'][0]['description'],
-           		'icon' : r['weather'][0]['icon']
+           		'icon' : r['weather'][0]['icon'],
 		}
 		
 		weather_data.append(city_weather)
 		
     	context = {'weather_data' : weather_data, 'form' : form }
-	return render(request, 'weather/weather.html' context)
+	return render(request, 'weather/weather.html',context)
